@@ -1,8 +1,8 @@
 from setuptools import setup
 
-setup(name="babylon",
+setup(name="urlshortener",
       version="0.1",
       author="Alex Sparrow",
-      packages=["babylon"],
-      package_dir={"babylon": "src/babylon"},
+      packages=["urlshortener"],
+      package_dir={"urlshortener": "src/urlshortener"},
       zip_safe=False)

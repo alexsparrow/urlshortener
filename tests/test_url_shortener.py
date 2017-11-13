@@ -2,8 +2,8 @@ import datetime
 import time
 import pytest
 
-from babylon.server import create_web_app
-from babylon.backend import FileSystemBackend
+from urlshortener.server import create_web_app
+from urlshortener.backend import FileSystemBackend
 
 BASE = "https://www.my-service.com"
 KEY_LENGTH = 10
@@ -41,4 +41,3 @@ async def test_invalid_url_400(cli):
   assert resp.status == 400
 
  
-

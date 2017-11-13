@@ -42,8 +42,8 @@ def create_web_app(backend, url_base):
 if __name__ == "__main__":
   loop = asyncio.get_event_loop()
 
-  url_base = os.environ["BABYLON_URL_BASE"]
-  data_dir = os.environ["BABYLON_DATA_DIR"]
+  url_base = os.environ["URLSHORTENER_URL_BASE"]
+  data_dir = os.environ["URLSHORTENER_DATA_DIR"]
   backend = FileSystemBackend(loop, data_dir, 10)
 
   app = create_web_app(backend, url_base)

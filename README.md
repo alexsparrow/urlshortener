@@ -10,10 +10,10 @@ pip install -r requirements.txt
 To run this service:
 
 ```
-export BABYLON_URL_BASE=https://www.base-url.com
-export BABYLON_DATA_DIR=/path/to/data
+export URLSHORTENER_URL_BASE=https://www.base-url.com
+export URLSHORTENER_DATA_DIR=/path/to/data
 
-PYTHONPATH=src python -m  babylon.server
+PYTHONPATH=src python -m  urlshortener.server
 ```
 
 To run the tests:
