@@ -24,25 +24,28 @@ class FileSystemBackend(Backend):
 
   def _write_key_if_unique(self, path, url):
     if not os.path.exists(path):
-      # Create the directory if necessary
-      dir_name = os.path.dirname(path)
-      if not os.path.exists(dir_name):
-        os.makedirs(dir_name)
+      self._make_dirs(path)
 
       with open(path, "w") as f:
         f.write(url)
       return True
+
     return False
 
   def _read_key(self, path):
     if not os.path.exists(path):
       return None
-    else:
-      with open(path) as f:
-        return f.read()
+    with open(path) as f:
+      return f.read()
 
   def _make_path(self, key):
     return os.path.join(self._path, key)
+
+  def _make_dirs(self, path):
+    # Create the directory if necessary
+    dir_name = os.path.dirname(path)
+    if not os.path.exists(dir_name):
+      os.makedirs(dir_name)
 
   async def shorten(self, url):
     while True:
@@ -55,5 +58,3 @@ class FileSystemBackend(Backend):
   async def lengthen(self, key):
     path = self._make_path(key)
     return await self._run_blocking(lambda: self._read_key(path))
-
-  
