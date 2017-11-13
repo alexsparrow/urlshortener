@@ -1,15 +1,23 @@
 import asyncio
 import datetime
+import os
 
 from aiohttp import web
+import validators
 
 from .backend import FileSystemBackend
+
+def validate_url(url):
+  return bool(validators.url(url))
 
 def create_web_app(backend, url_base):
   async def shorten_url(request):
     data = await request.json()
 
     url = data["url"]
+    if not validate_url(url):
+      return web.HTTPBadRequest()
+
     short_url = "{}/{}".format(url_base, await backend.shorten(url))
 
     return web.json_response({
@@ -19,7 +27,6 @@ def create_web_app(backend, url_base):
   async def lengthen_url(request):
     key = request.match_info["key"]
     url = await backend.lengthen(key)
-
 
     if url:
       return web.HTTPFound(url)
@@ -34,7 +41,10 @@ def create_web_app(backend, url_base):
 
 if __name__ == "__main__":
   loop = asyncio.get_event_loop()
-  backend = FileSystemBackend(loop, "./data", 10)
-  url_base = "http://localhost:8080"
+
+  url_base = os.environ["BABYLON_URL_BASE"]
+  data_dir = os.environ["BABYLON_DATA_DIR"]
+  backend = FileSystemBackend(loop, data_dir, 10)
+
   app = create_web_app(backend, url_base)
   web.run_app(app)
