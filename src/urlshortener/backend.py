@@ -76,17 +76,20 @@ class FileSystemBackend(KVBackend):
     path = self._make_path(key)
     return await self._run_blocking(lambda: self._read_key(path))
 
-  class InMemoryBackend(KVBackend):
-    def __init__(self, key_gen):
-      self._key_gen = key_gen
-      self._store = {}
+class InMemoryBackend(KVBackend):
+  def __init__(self, loop, key_gen):
+    self._key_gen = key_gen
+    self._store = {}
+    self._lock = asyncio.locks.Lock(loop=loop)
 
-    async def shorten(self, url):
-      while True:
-        key = self._key_gen.generate()
-        with await self._lock:
+  async def shorten(self, url):
+    while True:
+      key = self._key_gen.generate()
+      with await self._lock:
+        if not key in self._store:
           self._store[key] = url
+          return key
 
-    async def lengthen(self, key):
-      return self._store.get(key, None)
+  async def lengthen(self, key):
+    return self._store.get(key, None)
 
