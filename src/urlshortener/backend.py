@@ -61,6 +61,7 @@ class FileSystemBackend(KVBackend):
 
   def _make_path(self, key):
     # NOTE: to support a larger keyspace, this might split the key up into subdirectories
+    # e.g. a/b/abcde
     return os.path.join(self._path, key)
 
   def _make_dirs(self, path):
@@ -73,6 +74,8 @@ class FileSystemBackend(KVBackend):
     while True:
       key = self._key_gen.generate()
       path = self._make_path(key)
+
+      # I think I can do this without a lock on Linux by using a rename and testing for failure
       with await self._lock:
         if await self._run_blocking(lambda: self._write_key_if_unique(path, url)):
           return key
