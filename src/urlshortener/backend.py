@@ -8,12 +8,13 @@ class KeyGenerator:
     pass
 
 class RandomKeyGenerator(KeyGenerator):
-  def __init__(self, key_length):
+  def __init__(self, key_length, prefix=""):
     self._key_length = key_length
+    self._prefix = prefix
 
   def generate(self):
-    return "".join(random.choice(string.ascii_letters) for i in range(self._key_length))
-
+    rand_key = "".join(random.choice(string.ascii_letters) for i in range(self._key_length))
+    return self._prefix + rand_key
 
 class KVBackend:
   async def shorten(self, url):
@@ -54,6 +55,7 @@ class FileSystemBackend(KVBackend):
       return f.read()
 
   def _make_path(self, key):
+    # NOTE: to support a larger keyspace, this might split the key up into subdirectories
     return os.path.join(self._path, key)
 
   def _make_dirs(self, path):
@@ -73,3 +75,18 @@ class FileSystemBackend(KVBackend):
   async def lengthen(self, key):
     path = self._make_path(key)
     return await self._run_blocking(lambda: self._read_key(path))
+
+  class InMemoryBackend(KVBackend):
+    def __init__(self, key_gen):
+      self._key_gen = key_gen
+      self._store = {}
+
+    async def shorten(self, url):
+      while True:
+        key = self._key_gen.generate()
+        with await self._lock:
+          self._store[key] = url
+
+    async def lengthen(self, key):
+      return self._store.get(key, None)
+

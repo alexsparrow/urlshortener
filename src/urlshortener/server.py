@@ -42,9 +42,16 @@ def create_web_app(backend, url_base):
 if __name__ == "__main__":
   loop = asyncio.get_event_loop()
 
-  url_base = os.environ["URLSHORTENER_URL_BASE"]
-  data_dir = os.environ["URLSHORTENER_DATA_DIR"]
-  key_gen = RandomKeyGenerator(10)
+  # The root of shortened URLs (without trailing slash)
+  url_base = os.environ.get("URLSHORTENER_URL_BASE", "http://localhost:8080")
+
+  # The root directory for storing application state
+  data_dir = os.environ.get("URLSHORTENER_DATA_DIR", "./data")
+
+  # A prefix to use for generated URLs if multiple replicas are sharing a filesystem
+  key_prefix = os.environ.get("URLSHORTENER_KEY_PREFIX", "")
+
+  key_gen = RandomKeyGenerator(10, prefix=key_prefix)
   backend = FileSystemBackend(loop, data_dir, key_gen)
 
   app = create_web_app(backend, url_base)
