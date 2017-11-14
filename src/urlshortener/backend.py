@@ -26,6 +26,11 @@ class KVBackend:
     pass
 
 class FileSystemBackend(KVBackend):
+  """
+  A basic backend to store shortened URLs flat in the filesystem
+
+  NOTE that since the file APIs are blocking, this class isn't currently able to take advantage of asynchronous I/O.
+  """
   def __init__(self, loop, path, key_gen):
     self._loop = loop
     self._path = path

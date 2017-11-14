@@ -30,6 +30,19 @@ async def test_basic(cli):
   assert resp.status == 302
   assert resp.headers["Location"] == "https://www.foo.com"
 
+async def test_stress(cli):
+  for i in range(100):
+    url = "https://www.foo.com/{}".format(i)
+    resp = await cli.post("/shorten_url", json={"url": url})
+    assert resp.status == 200
+
+    data = await resp.json()
+    key = data["shortened_url"][len(BASE) + 1:]
+
+    resp = await cli.get("/{}".format(key), allow_redirects=False)
+    assert resp.status == 302
+    assert resp.headers["Location"] == url
+
 async def test_not_found(cli):
   resp = await cli.post("/shorten_url", json={"url": "https://www.foo.com"})
   assert resp.status == 200
