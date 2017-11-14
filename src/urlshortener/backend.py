@@ -3,7 +3,19 @@ import string
 import os.path
 import asyncio.locks
 
-class Backend:
+class KeyGenerator:
+  def generate(self):
+    pass
+
+class RandomKeyGenerator(KeyGenerator):
+  def __init__(self, key_length):
+    self._key_length = key_length
+
+  def generate(self):
+    return "".join(random.choice(string.ascii_letters) for i in range(self._key_length))
+
+
+class KVBackend:
   async def shorten(self, url):
     """Shorten a given URL and return the key"""
     pass
@@ -12,17 +24,20 @@ class Backend:
     """Given a shortened URL key, return the full URL"""
     pass
 
-class FileSystemBackend(Backend):
-  def __init__(self, loop, path, url_length):
+class FileSystemBackend(KVBackend):
+  def __init__(self, loop, path, key_gen):
     self._loop = loop
     self._path = path
-    self._url_length = url_length
+    self._key_gen = key_gen
     self._lock = asyncio.locks.Lock(loop=loop)
 
   async def _run_blocking(self, func):
     return await self._loop.run_in_executor(None, func)
 
   def _write_key_if_unique(self, path, url):
+    # I think this logic can be better done with an atomic rename (on Linux at least)
+    # That avoids the race condition between exists and write and obviates the need
+    # for a lock.
     if not os.path.exists(path):
       self._make_dirs(path)
 
@@ -49,7 +64,7 @@ class FileSystemBackend(Backend):
 
   async def shorten(self, url):
     while True:
-      key = "".join(random.choice(string.ascii_letters) for i in range(self._url_length))
+      key = self._key_gen.generate()
       path = self._make_path(key)
       with await self._lock:
         if await self._run_blocking(lambda: self._write_key_if_unique(path, url)):

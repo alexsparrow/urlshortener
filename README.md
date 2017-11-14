@@ -25,4 +25,4 @@ PYTHONPATH=src pytest
 ## Scaling
 To achieve straightforward scaling, set the base URL on each node (`<number>=0..n`) to e.g. `https://www.base-url.com/<number>` and setup a suitable reverse proxy (e.g. nginx) to forward traffic to each node on the appropriate path.
 
-Alternatively point the data directory at a shared filesystem and configure the reverse proxy to load balance across the nodes.
+Alternatively point the data directory at a shared filesystem and configure the reverse proxy to load balance across the nodes (note this requires a key generator that will generate unique keys per node).

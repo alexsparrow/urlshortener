@@ -3,15 +3,16 @@ import time
 import pytest
 
 from urlshortener.server import create_web_app
-from urlshortener.backend import FileSystemBackend
+from urlshortener.backend import FileSystemBackend, RandomKeyGenerator
 
 BASE = "https://www.my-service.com"
 KEY_LENGTH = 10
 
 @pytest.fixture
 def cli(loop, test_client, tmpdir_factory):
-    app = create_web_app(FileSystemBackend(loop, tmpdir_factory.mktemp("data"), KEY_LENGTH), BASE)
-    return loop.run_until_complete(test_client(app))
+  key_gen = RandomKeyGenerator(KEY_LENGTH)
+  app = create_web_app(FileSystemBackend(loop, tmpdir_factory.mktemp("data"), key_gen), BASE)
+  return loop.run_until_complete(test_client(app))
 
 async def test_basic(cli):
   resp = await cli.post("/shorten_url", json={"url": "https://www.foo.com"})

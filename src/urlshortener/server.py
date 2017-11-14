@@ -5,7 +5,7 @@ import os
 from aiohttp import web
 import validators
 
-from .backend import FileSystemBackend
+from .backend import FileSystemBackend, RandomKeyGenerator
 
 def validate_url(url):
   return bool(validators.url(url))
@@ -44,7 +44,8 @@ if __name__ == "__main__":
 
   url_base = os.environ["URLSHORTENER_URL_BASE"]
   data_dir = os.environ["URLSHORTENER_DATA_DIR"]
-  backend = FileSystemBackend(loop, data_dir, 10)
+  key_gen = RandomKeyGenerator(10)
+  backend = FileSystemBackend(loop, data_dir, key_gen)
 
   app = create_web_app(backend, url_base)
   web.run_app(app)
